@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const authToken = require("../middleware/auth");
 const fs = require("fs");
 const path = require("path");
+const { createNote } = require("../model/note");
 
 const {
   createUser,

@@ -13,13 +13,20 @@ function authToken(request, response, next) {
     if (err) {
       return response.sendStatus(403);
     }
+
     try {
       const user = await User.findOne({ uuid: payload.userId });
       if (!user) {
         throw new Error();
       }
+
+      const accessToken = jwt.sign(
+        { userId: user.uuid },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "10m" }
+      );
       request.user = user;
-      next();
+      response.json({ accessToken: accessToken }); // send the accessToken to the client
     } catch (err) {
       return response.sendStatus(403);
     }

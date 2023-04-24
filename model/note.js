@@ -1,10 +1,9 @@
 const nedb = require("nedb-promises");
 const database = new nedb({ filename: "notes.db", autoload: true });
-const uuid = require("uuid-random");
 
 async function createNote(note) {
   return await database.insert({
-    id: uuid(),
+    id: note.id,
     title: note.title,
     text: note.text,
     createdAt: new Date().toISOString(),
@@ -22,7 +21,11 @@ async function findNoteById(id) {
 }
 
 async function updateNoteById(id, note) {
-  return await database.update({ id: id }, { $set: note });
+  await database.update(
+    { id: id },
+    { $set: { ...note, modifiedAt: new Date().toISOString() } }
+  );
+  return note;
 }
 
 async function deleteNoteById(id, userId) {
