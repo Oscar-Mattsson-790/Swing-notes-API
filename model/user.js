@@ -1,5 +1,5 @@
 const nedb = require("nedb-promises");
-const database = new nedb({ filename: "accounts.db", autload: true });
+const database = new nedb({ filename: "accounts.db", autoload: true });
 const uuid = require("uuid-random");
 
 const { hashPassword, comparePassword } = require("../utils/utils");
@@ -16,7 +16,7 @@ async function createUser(credentials) {
 }
 
 async function findUserByUsername(username) {
-  return await database.findOne({ username: username }, { password: 1 });
+  return await database.findOne({ username: username }, { password: 0 });
 }
 
 async function findUserById(id) {

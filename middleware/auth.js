@@ -14,7 +14,7 @@ function authToken(request, response, next) {
       return response.sendStatus(403);
     }
     try {
-      const user = await User.findOne({ _id: payload.userId });
+      const user = await User.findOne({ uuid: payload.userId });
       if (!user) {
         throw new Error();
       }

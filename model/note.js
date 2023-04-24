@@ -9,6 +9,7 @@ async function createNote(note) {
     text: note.text,
     createdAt: new Date().toISOString(),
     modifiedAt: new Date().toISOString(),
+    owner: note.owner,
   });
 }
 
@@ -24,7 +25,16 @@ async function updateNoteById(id, note) {
   return await database.update({ id: id }, { $set: note });
 }
 
-async function deleteNoteById(id) {
+async function deleteNoteById(id, userId) {
+  const note = await findNoteById(id);
+  if (!note) {
+    throw new Error("Note not found");
+  }
+
+  if (note.owner !== userId) {
+    throw new Error("Not authorized to delete the note");
+  }
+
   return await database.remove({ id: id });
 }
 
