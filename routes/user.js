@@ -2,11 +2,11 @@ const { Router } = require("express");
 const router = new Router();
 const jwt = require("jsonwebtoken");
 const authToken = require("../middleware/auth");
-const noteModel = require("../model/note");
 const fs = require("fs");
 const path = require("path");
+const createUser = require("../model/user");
 
-const notesPath = path.join(__dirname, "/utils/notes.json");
+const notesPath = path.join(__dirname, "../utils/notes.json");
 
 router.get("/notes", (request, response) => {
   const notesData = fs.readFileSync(notesPath, "utf-8");
@@ -15,18 +15,13 @@ router.get("/notes", (request, response) => {
   response.json(allNotes);
 });
 
-router.post("/notes", (request, response) => {
-  const note = request.body;
-
-  // Save the note to the database using your model
-  noteModel.create(note, (err, savedNote) => {
-    if (err) {
-      response.status(500).json({ error: "Failed to save note" });
-    } else {
-      // Return the saved note in the response
-      response.status(201).json(savedNote);
-    }
-  });
+router.post("/notes", async (request, response) => {
+  try {
+    const createdUser = await createUser(request.body);
+    response.status(201).json(createdUser);
+  } catch (error) {
+    response.status(500).json({ error: "Failed to create user" });
+  }
 });
 
 router.put("/notes/:id", (request, response) => {
