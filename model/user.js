@@ -2,7 +2,7 @@ const nedb = require("nedb-promises");
 const database = new nedb({ filename: "accounts.db", autload: true });
 const uuid = require("uuid-random");
 
-const { hashPassword } = require("../utils/utils");
+const { hashPassword, comparePassword } = require("../utils/utils");
 
 async function createUser(credentials) {
   const pass = await hashPassword(credentials.password);
