@@ -2,60 +2,78 @@ const { Router } = require("express");
 const router = new Router();
 const jwt = require("jsonwebtoken");
 const authToken = require("../middleware/auth");
+const noteModel = require("../model/note");
 const fs = require("fs");
 const path = require("path");
 
-const notesFilePath = path.join(__dirname, "/utils/notes.json");
+const notesPath = path.join(__dirname, "/utils/notes.json");
 
-// GET endpoint to retrieve all notes
-router.get("/notes", (req, res) => {
-  const notesData = fs.readFileSync(notesFilePath, "utf-8");
-  const notes = JSON.parse(notesData);
+router.get("/notes", (request, response) => {
+  const notesData = fs.readFileSync(notesPath, "utf-8");
+  const allNotes = JSON.parse(notesData);
 
-  res.json(notes);
+  response.json(allNotes);
 });
 
-// POST endpoint to save a new note
-router.post("/notes", (req, res) => {
-  const note = req.body;
+router.post("/notes", (request, response) => {
+  const note = request.body;
 
-  res.status(201).json(savedNote);
+  // Save the note to the database using your model
+  noteModel.create(note, (err, savedNote) => {
+    if (err) {
+      response.status(500).json({ error: "Failed to save note" });
+    } else {
+      // Return the saved note in the response
+      response.status(201).json(savedNote);
+    }
+  });
 });
 
-// PUT endpoint to modify an existing note
-router.put("/notes/:id", (req, res) => {
-  const noteId = req.params.id;
-  const updatedNote = req.body;
+router.put("/notes/:id", (request, response) => {
+  const noteId = request.params.id;
+  const updatedNote = request.body;
 
-  res.json(updatedNote);
+  response.json(updatedNote);
 });
 
-// DELETE endpoint to delete a note
-router.delete("/notes/:id", (req, res) => {
-  const noteId = req.params.id;
+router.delete("/notes/:id", (request, response) => {
+  const noteId = request.params.id;
 
-  res.sendStatus(204);
+  response.sendStatus(204);
 });
 
-// POST endpoint to create a new user account
-router.post("/user/signup", (req, res) => {
-  const userData = req.body;
-
-  res.status(201).json(createdUser);
+router.post("/user/signup", async (request, response) => {
+  try {
+    const createdUser = await createUser(request.body);
+    response.status(201).json(createdUser);
+  } catch (error) {
+    response.status(500).json({ error: "Failed to create user" });
+  }
 });
 
-// POST endpoint to log in to an existing user account
-router.post("/user/login", (req, res) => {
-  const loginData = req.body;
+router.post("/user/login", async (request, response) => {
+  const { username, password } = request.body;
 
-  res.json({ message: "Logged in successfully!" });
-});
+  try {
+    const user = await findUserByUsername(username);
+    if (!user) {
+      throw new Error();
+    }
 
-// GET endpoint to search for notes by title
-router.get("/notes/search", (req, res) => {
-  const searchTerm = req.query.title;
+    const isPasswordCorrect = await comparePassword(password, user.password);
+    if (!isPasswordCorrect) {
+      throw new Error();
+    }
 
-  res.json(searchResults);
+    const token = jwt.sign(
+      { userId: user.uuid },
+      process.env.ACCESS_TOKEN_SECRET
+    );
+    response.cookie("token", token, { httpOnly: true });
+    response.json({ message: "Logged in successfully!" });
+  } catch (error) {
+    response.status(401).json({ error: "Invalid username or password" });
+  }
 });
 
 module.exports = router;
