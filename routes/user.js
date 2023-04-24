@@ -4,7 +4,11 @@ const jwt = require("jsonwebtoken");
 const authToken = require("../middleware/auth");
 const fs = require("fs");
 const path = require("path");
-const createUser = require("../model/user");
+const {
+  createUser,
+  findUserByUsername,
+  comparePassword,
+} = require("../model/user");
 
 const notesPath = path.join(__dirname, "../utils/notes.json");
 
