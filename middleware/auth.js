@@ -25,7 +25,7 @@ async function authToken(request, response, next) {
 
     const payload = await jwt.verify(token, secret);
     console.log(payload);
-    const user = await User.findUserById({ uuid: payload.userId });
+    const user = await User.findUserById(payload.userId);
 
     if (!user) {
       console.log("User associated with the token not found");

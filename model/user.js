@@ -24,8 +24,13 @@ async function findUserByUsername(username) {
   return user;
 }
 
-async function findUserById(id) {
-  return await database.findOne({ uuid: id });
+function findUserById(id) {
+  const user = database.findOne({ uuid: id });
+  console.log("hej", user);
+  if (!user) {
+    return null;
+  }
+  return user;
 }
 
 module.exports = {

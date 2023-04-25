@@ -44,7 +44,8 @@ router.put("/notes/:id", authToken, async (request, response) => {
   try {
     const noteId = request.params.id;
     const updatedNote = request.body;
-
+    console.log(request.params);
+    console.log(noteId);
     const note = await findNoteById(noteId);
     if (!note) {
       return response.status(404).json({ error: "Note not found" });
