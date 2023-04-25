@@ -12,22 +12,17 @@ async function createNote(note) {
   });
 }
 
-async function findNotes() {
-  return await database.find({});
+function findNotes() {
+  return database.find({});
 }
 
 function findNoteById(id) {
-  const note = database.findOne({ id: id });
-
-  if (!note) {
-    return null;
-  }
-  return note;
+  return database.findOne({ _id: id});
 }
 
 async function updateNoteById(id, note) {
   await database.update(
-    { id: id },
+    { _id: id },
     { $set: { ...note, modifiedAt: new Date().toISOString() } }
   );
   return note;

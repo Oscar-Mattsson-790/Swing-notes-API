@@ -4,26 +4,18 @@ const jwt = require("jsonwebtoken");
 const authToken = require("../middleware/auth");
 const fs = require("fs");
 const path = require("path");
-const { createNote } = require("../model/note");
+const Note = require("../model/note");
 const { comparePassword } = require("../utils/utils");
 const { createUser, findUserByUsername } = require("../model/user");
-
-const {
-  findNoteById,
-  updateNoteById,
-  deleteNoteById,
-} = require("../model/note");
 
 const notesPath = path.join(__dirname, "../utils/notes.json");
 
 router.get("/notes", (request, response) => {
-  try {
-    const data = fs.readFileSync(notesPath, "utf-8");
-    const allNotes = JSON.parse(data);
-    response.status(200).json(allNotes);
-  } catch (error) {
+  Note.findNotes().then(function (notes) {
+    response.status(200).json(notes);
+  }).catch(function (err) {
     response.status(500).json({ error: "Internal server error" });
-  }
+  });
 });
 
 router.post("/notes", authToken, async (request, response) => {
@@ -32,7 +24,7 @@ router.post("/notes", authToken, async (request, response) => {
       ...request.body,
       owner: request.user.uuid,
     };
-    const createdNote = await createNote(note);
+    const createdNote = await Note.createNote(note);
     response.status(200).json(createdNote);
   } catch (error) {
     console.error(error);
@@ -41,35 +33,37 @@ router.post("/notes", authToken, async (request, response) => {
 });
 
 router.put("/notes/:id", authToken, async (request, response) => {
-  try {
-    const noteId = request.params.id;
-    const updatedNote = request.body;
-    console.log(request.params);
-    console.log(noteId);
-    const note = await findNoteById(noteId);
-    console.log("hej", note);
+  const noteId = request.params.id;
+  const updatedNote = request.body;
+
+  Note.findNoteById(noteId).then(function (note) {
+    console.log("aoeu", note)
     if (!note) {
       return response.status(404).json({ error: "Note not found" });
     }
-    console.log(note.id);
+
     if (note.owner !== request.user.uuid) {
       return response
-        .status(403)
-        .json({ error: "Not authorized to update the note" });
+          .status(403)
+          .json({ error: "Not authorized to update the note" });
     }
 
-    const updatedNoteInDb = await updateNoteById(noteId, updatedNote);
-    response.status(200).json(updatedNoteInDb);
-  } catch (error) {
-    console.error(error);
+    Note.updateNoteById(noteId, updatedNote).then(function (res) {
+      response.status(200).json(res);
+    }).catch(function (err) {
+      console.error(err);
+      response.status(500).json({ error: "Internal server error" });
+    });
+  }).catch(function (err) {
+    console.error(err);
     response.status(500).json({ error: "Internal server error" });
-  }
+  });
 });
 
 router.delete("/notes/:id", authToken, async (request, response) => {
   try {
     const noteId = request.params.id;
-    await deleteNoteById(noteId, request.user.uuid);
+    await Note.deleteNoteById(noteId, request.user.uuid);
     response.sendStatus(200);
   } catch (error) {
     console.error(error);
@@ -108,7 +102,7 @@ router.post("/user/login", async (request, response) => {
       process.env.ACCESS_TOKEN_SECRET
     );
     response.cookie("token", token, { httpOnly: true });
-    response.status(200).json({ message: "Logged in successfully!" });
+    response.status(200).json({ message: "Logged in successfully!", token: token });
   } catch (error) {
     console.error(error);
     response.status(500).json({ error: "Internal server error" });
