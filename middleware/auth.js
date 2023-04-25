@@ -13,7 +13,7 @@ async function authToken(request, response, next) {
   try {
     console.log("authToken middleware called");
     console.log("headers:", request.headers);
-    const authHeader = request.headers["authorization"];
+    const authHeader = request.headers["Authorization"];
     console.log("authHeader:", authHeader);
     const token = authHeader && authHeader.split(" ")[1];
     console.log("token:", token);
