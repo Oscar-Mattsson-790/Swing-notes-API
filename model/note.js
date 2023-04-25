@@ -17,7 +17,7 @@ function findNotes() {
 }
 
 function findNoteById(id) {
-  return database.findOne({ _id: id});
+  return database.findOne({ _id: id });
 }
 
 async function updateNoteById(id, note) {
