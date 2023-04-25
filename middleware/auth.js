@@ -1,36 +1,31 @@
+require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const User = require("../model/user");
+const crypto = require("crypto");
+const secret = crypto.randomBytes(64).toString("hex");
+process.env.ACCESS_TOKEN_SECRET = secret;
 
-function authToken(request, response, next) {
+console.log(secret);
+
+async function authToken(request, response, next) {
   const authHeader = request.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const token = authHeader && authHeader.replace("Bearer ", "");
 
-  if (token == null) {
-    return response.sendStatus(401);
+  try {
+    const payload = await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await User.findOne({ uuid: payload.userId });
+
+    if (!user) {
+      throw new Error();
+    }
+
+    request.user = user;
+    request.token = token;
+    request.id = payload.userId;
+    next();
+  } catch (error) {
+    response.json({ success: false, error: "Invalid token" });
   }
-
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, payload) => {
-    if (err) {
-      return response.sendStatus(403);
-    }
-
-    try {
-      const user = await User.findOne({ uuid: payload.userId });
-      if (!user) {
-        throw new Error();
-      }
-
-      const accessToken = jwt.sign(
-        { userId: user.uuid },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "10m" }
-      );
-      request.user = user;
-      response.json({ accessToken: accessToken }); // send the accessToken to the client
-    } catch (err) {
-      return response.sendStatus(403);
-    }
-  });
 }
 
 module.exports = authToken;

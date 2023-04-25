@@ -21,10 +21,13 @@ const {
 const notesPath = path.join(__dirname, "../utils/notes.json");
 
 router.get("/notes", (request, response) => {
-  const data = fs.readFileSync(notesPath, "utf-8");
-  const allNotes = JSON.parse(data);
-
-  response.json(allNotes);
+  try {
+    const data = fs.readFileSync(notesPath, "utf-8");
+    const allNotes = JSON.parse(data);
+    response.status(200).json(allNotes);
+  } catch (error) {
+    response.status(500).json({ error: "Internal server error" });
+  }
 });
 
 router.post("/notes", authToken, async (request, response) => {
@@ -36,7 +39,8 @@ router.post("/notes", authToken, async (request, response) => {
     const createdNote = await createNote(note);
     response.status(200).json(createdNote);
   } catch (error) {
-    response.status(500).json({ error: "Failed to save note" });
+    console.error(error);
+    response.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -57,10 +61,10 @@ router.put("/notes/:id", authToken, async (request, response) => {
     }
 
     const updatedNoteInDb = await updateNoteById(noteId, updatedNote);
-    response.json(updatedNoteInDb);
+    response.status(200).json(updatedNoteInDb);
   } catch (error) {
     console.error(error);
-    response.status(500).json({ error: "Failed to update the note" });
+    response.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -68,10 +72,10 @@ router.delete("/notes/:id", authToken, async (request, response) => {
   try {
     const noteId = request.params.id;
     await deleteNoteById(noteId, request.user.uuid);
-    response.sendStatus(204);
+    response.sendStatus(200);
   } catch (error) {
     console.error(error);
-    response.status(500).json({ error: "Failed to delete the note" });
+    response.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -80,7 +84,8 @@ router.post("/user/signup", async (request, response) => {
     const createdUser = await createUser(request.body);
     response.status(200).json(createdUser);
   } catch (error) {
-    response.status(500).json({ error: "Failed to create user" });
+    console.error(error);
+    response.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -90,12 +95,14 @@ router.post("/user/login", async (request, response) => {
   try {
     const user = await findUserByUsername(username);
     if (!user) {
-      throw new Error();
+      response.status(404).json({ error: "User not found" });
+      return;
     }
 
     const isPasswordCorrect = await comparePassword(password, user.password);
     if (!isPasswordCorrect) {
-      throw new Error();
+      response.status(401).json({ error: "Invalid username or password" });
+      return;
     }
 
     const token = jwt.sign(
@@ -103,9 +110,10 @@ router.post("/user/login", async (request, response) => {
       process.env.ACCESS_TOKEN_SECRET
     );
     response.cookie("token", token, { httpOnly: true });
-    response.json({ message: "Logged in successfully!" });
+    response.status(200).json({ message: "Logged in successfully!" });
   } catch (error) {
-    response.status(401).json({ error: "Invalid username or password" });
+    console.error(error);
+    response.status(500).json({ error: "Internal server error" });
   }
 });
 

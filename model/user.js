@@ -15,8 +15,20 @@ async function createUser(credentials) {
   });
 }
 
-async function findUserByUsername(username) {
-  return await database.findOne({ username: username }, { password: 0 });
+async function findUserByUsername(username, password) {
+  const user = await database.findOne({ username: username });
+  if (!user) {
+    return null;
+  }
+
+  const isMatch = await comparePassword(password, user.password);
+  if (!isMatch) {
+    return null;
+  }
+
+  delete user.password;
+
+  return user;
 }
 
 async function findUserById(id) {
