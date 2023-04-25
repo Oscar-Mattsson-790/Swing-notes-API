@@ -17,6 +17,7 @@ async function createUser(credentials) {
 
 async function findUserByUsername(username) {
   const user = await database.findOne({ username: username });
+
   if (!user) {
     return null;
   }

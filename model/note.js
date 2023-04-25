@@ -16,8 +16,13 @@ async function findNotes() {
   return await database.find({});
 }
 
-async function findNoteById(id) {
-  return await database.findOne({ id: id });
+function findNoteById(id) {
+  const note = database.findOne({ id: id });
+
+  if (!note) {
+    return null;
+  }
+  return note;
 }
 
 async function updateNoteById(id, note) {

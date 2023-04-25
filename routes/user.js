@@ -47,10 +47,11 @@ router.put("/notes/:id", authToken, async (request, response) => {
     console.log(request.params);
     console.log(noteId);
     const note = await findNoteById(noteId);
+    console.log("hej", note);
     if (!note) {
       return response.status(404).json({ error: "Note not found" });
     }
-
+    console.log(note.id);
     if (note.owner !== request.user.uuid) {
       return response
         .status(403)
