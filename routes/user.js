@@ -5,12 +5,8 @@ const authToken = require("../middleware/auth");
 const fs = require("fs");
 const path = require("path");
 const { createNote } = require("../model/note");
-
-const {
-  createUser,
-  findUserByUsername,
-  comparePassword,
-} = require("../model/user");
+const { comparePassword } = require("../utils/utils");
+const { createUser, findUserByUsername } = require("../model/user");
 
 const {
   findNoteById,
@@ -91,14 +87,14 @@ router.post("/user/signup", async (request, response) => {
 
 router.post("/user/login", async (request, response) => {
   const { username, password } = request.body;
-
+  console.log(username, password);
   try {
     const user = await findUserByUsername(username);
+    console.log(username, password, "Hej");
     if (!user) {
       response.status(404).json({ error: "User not found" });
       return;
     }
-
     const isPasswordCorrect = await comparePassword(password, user.password);
     if (!isPasswordCorrect) {
       response.status(401).json({ error: "Invalid username or password" });

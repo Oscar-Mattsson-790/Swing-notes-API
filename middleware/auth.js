@@ -13,9 +13,9 @@ async function authToken(request, response, next) {
   try {
     console.log("authToken middleware called");
     console.log("headers:", request.headers);
-    const authHeader = request.headers["Authorization"];
+    const authHeader = request.headers["authorization"];
     console.log("authHeader:", authHeader);
-    const token = authHeader && authHeader.split(" ")[1];
+    const token = request.headers.authorization.replace("Bearer ", "");
     console.log("token:", token);
 
     if (!token) {
@@ -24,7 +24,8 @@ async function authToken(request, response, next) {
     }
 
     const payload = await jwt.verify(token, secret);
-    const user = await User.findOne({ uuid: payload.userId });
+    console.log(payload);
+    const user = await User.findUserById({ uuid: payload.userId });
 
     if (!user) {
       console.log("User associated with the token not found");

@@ -15,18 +15,11 @@ async function createUser(credentials) {
   });
 }
 
-async function findUserByUsername(username, password) {
+async function findUserByUsername(username) {
   const user = await database.findOne({ username: username });
   if (!user) {
     return null;
   }
-
-  const isMatch = await comparePassword(password, user.password);
-  if (!isMatch) {
-    return null;
-  }
-
-  delete user.password;
 
   return user;
 }
@@ -35,4 +28,9 @@ async function findUserById(id) {
   return await database.findOne({ uuid: id });
 }
 
-module.exports = { createUser, findUserByUsername, findUserById };
+module.exports = {
+  createUser,
+  findUserByUsername,
+  findUserById,
+  comparePassword,
+};
