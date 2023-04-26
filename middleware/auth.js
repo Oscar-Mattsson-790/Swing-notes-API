@@ -7,8 +7,6 @@ const secret =
   process.env.ACCESS_TOKEN_SECRET || crypto.randomBytes(64).toString("hex");
 process.env.ACCESS_TOKEN_SECRET = secret;
 
-// console.log(secret);
-
 async function authToken(request, response, next) {
   try {
     const authHeader = request.headers["authorization"];
