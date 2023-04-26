@@ -27,7 +27,7 @@ async function findUserByUsername(username) {
 
 function findUserById(id) {
   const user = database.findOne({ uuid: id });
-  console.log("hej", user);
+
   if (!user) {
     return null;
   }

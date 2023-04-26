@@ -2,7 +2,8 @@ const nedb = require("nedb-promises");
 const database = new nedb({ filename: "notes.db", autoload: true });
 
 async function createNote(note) {
-  console.log("note:", note);
+  // console.log(note.id);
+  console.log("create note data:::", note);
   return await database.insert({
     id: note.id,
     title: note.title,
@@ -30,8 +31,8 @@ async function updateNoteById(id, note) {
 }
 
 async function deleteNoteById(id, userId) {
-  console.log("id:", id);
   const note = await findNoteById(id);
+
   if (!note) {
     throw new Error("Note not found");
   }

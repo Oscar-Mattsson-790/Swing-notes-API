@@ -40,7 +40,6 @@ router.put("/notes/:id", authToken, async (request, response) => {
 
   Note.findNoteById(noteId)
     .then(function (note) {
-      console.log("aoeu", note);
       if (!note) {
         return response.status(404).json({ error: "Note not found" });
       }
@@ -88,11 +87,12 @@ router.post("/user/signup", async (request, response) => {
 });
 
 router.post("/user/login", async (request, response) => {
+  console.log(request.body);
   const { username, password } = request.body;
-  console.log(username, password);
+
   try {
     const user = await findUserByUsername(username);
-    console.log(username, password, "Hej");
+
     if (!user) {
       response.status(404).json({ error: "User not found" });
       return;

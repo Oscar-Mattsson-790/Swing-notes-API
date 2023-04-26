@@ -160,7 +160,7 @@
         "title": {
           "type": "string"
         },
-        "content": {
+        "text": {
           "type": "string"
         },
         "createdAt": {
