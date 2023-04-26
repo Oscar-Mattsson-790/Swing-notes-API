@@ -13,6 +13,13 @@ async function authToken(request, response, next) {
   try {
     const authHeader = request.headers["authorization"];
 
+    if (!authHeader) {
+      console.log("Access token is missing or invalid");
+      return response
+        .status(401)
+        .json({ message: "Access token is missing or invalid" });
+    }
+
     const token = request.headers.authorization.replace("Bearer ", "");
 
     if (!token) {
