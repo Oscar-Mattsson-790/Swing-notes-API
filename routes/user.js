@@ -11,11 +11,13 @@ const { createUser, findUserByUsername } = require("../model/user");
 const notesPath = path.join(__dirname, "../utils/notes.json");
 
 router.get("/notes", (request, response) => {
-  Note.findNotes().then(function (notes) {
-    response.status(200).json(notes);
-  }).catch(function (err) {
-    response.status(500).json({ error: "Internal server error" });
-  });
+  Note.findNotes()
+    .then(function (notes) {
+      response.status(200).json(notes);
+    })
+    .catch(function (err) {
+      response.status(500).json({ error: "Internal server error" });
+    });
 });
 
 router.post("/notes", authToken, async (request, response) => {
@@ -36,28 +38,32 @@ router.put("/notes/:id", authToken, async (request, response) => {
   const noteId = request.params.id;
   const updatedNote = request.body;
 
-  Note.findNoteById(noteId).then(function (note) {
-    console.log("aoeu", note)
-    if (!note) {
-      return response.status(404).json({ error: "Note not found" });
-    }
+  Note.findNoteById(noteId)
+    .then(function (note) {
+      console.log("aoeu", note);
+      if (!note) {
+        return response.status(404).json({ error: "Note not found" });
+      }
 
-    if (note.owner !== request.user.uuid) {
-      return response
+      if (note.owner !== request.user.uuid) {
+        return response
           .status(403)
           .json({ error: "Not authorized to update the note" });
-    }
+      }
 
-    Note.updateNoteById(noteId, updatedNote).then(function (res) {
-      response.status(200).json(res);
-    }).catch(function (err) {
+      Note.updateNoteById(noteId, updatedNote)
+        .then(function (res) {
+          response.status(200).json(res);
+        })
+        .catch(function (err) {
+          console.error(err);
+          response.status(500).json({ error: "Internal server error" });
+        });
+    })
+    .catch(function (err) {
       console.error(err);
       response.status(500).json({ error: "Internal server error" });
     });
-  }).catch(function (err) {
-    console.error(err);
-    response.status(500).json({ error: "Internal server error" });
-  });
 });
 
 router.delete("/notes/:id", authToken, async (request, response) => {
@@ -102,7 +108,9 @@ router.post("/user/login", async (request, response) => {
       process.env.ACCESS_TOKEN_SECRET
     );
     response.cookie("token", token, { httpOnly: true });
-    response.status(200).json({ message: "Logged in successfully!", token: token });
+    response
+      .status(200)
+      .json({ message: "Logged in successfully!", token: token });
   } catch (error) {
     console.error(error);
     response.status(500).json({ error: "Internal server error" });

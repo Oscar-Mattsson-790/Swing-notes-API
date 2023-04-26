@@ -2,6 +2,7 @@ const nedb = require("nedb-promises");
 const database = new nedb({ filename: "notes.db", autoload: true });
 
 async function createNote(note) {
+  console.log("note:", note);
   return await database.insert({
     id: note.id,
     title: note.title,
@@ -29,16 +30,16 @@ async function updateNoteById(id, note) {
 }
 
 async function deleteNoteById(id, userId) {
+  console.log("id:", id);
   const note = await findNoteById(id);
   if (!note) {
     throw new Error("Note not found");
   }
-
   if (note.owner !== userId) {
     throw new Error("Not authorized to delete the note");
   }
 
-  return await database.remove({ id: id });
+  return await database.remove({ _id: id });
 }
 
 module.exports = {
