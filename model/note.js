@@ -22,7 +22,6 @@ function findNoteById(id) {
 }
 
 async function updateNoteById(id, note) {
-  console.log("id", id);
   await database.update(
     { _id: id },
     { $set: { ...note, modifiedAt: new Date().toISOString() } }
