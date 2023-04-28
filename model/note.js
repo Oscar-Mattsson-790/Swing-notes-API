@@ -2,7 +2,6 @@ const nedb = require("nedb-promises");
 const database = new nedb({ filename: "notes.db", autoload: true });
 
 async function createNote(note) {
-  console.log("create note data:::", note);
   return await database.insert({
     id: note.id,
     title: note.title,
